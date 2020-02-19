@@ -1,0 +1,108 @@
+kind: Service
+apiVersion: v1
+metadata:
+  name: acho-web-service
+spec:
+  type: LoadBalancer
+  selector:
+    app: acho
+    type: web
+  ports:
+    - name: www
+      port: 80
+      targetPort: 80
+
+---
+
+kind: Deployment
+apiVersion: apps/v1
+metadata:
+  name: acho-web-deployment
+  labels:
+    app: acho
+    type: web
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: acho
+      type: web
+  template:
+    metadata:
+      annotations:
+        ad-hub.net/changeForRollingUpdate: U1
+      labels:
+        app: acho
+        type: web
+    spec:
+      volumes:
+      - name: nfs
+        persistentVolumeClaim:
+          claimName: nfs-pvc
+      hostAliases:
+      - ip: "10.240.0.6"  #change to external server's private ip
+        hostnames:
+        - "external-server"
+      - ip: "127.0.0.1"
+        hostnames:
+        - "acho-localhost"
+      containers:
+      - name: acho-web
+        image: adhubacr.azurecr.io/acho:EN-0.1
+        imagePullPolicy: IfNotPresent
+        env:
+        - name: LANG
+          value: "C.UTF-8"
+        - name: ENABLE_CROND
+          value: "no"
+        resources:
+          limits:
+            cpu: 512m
+            memory: 4Gi
+        ports:
+        - containerPort: 80
+        volumeMounts:
+        - name: nfs
+          mountPath: /ad-hub.net
+        - name: nfs
+          mountPath: /usr/local/etc/freetds.conf
+          subPath: docker-service/config/freetds/freetds.conf
+        - name: nfs
+          mountPath: /usr/local/etc/locales.conf
+          subPath: docker-service/config/freetds/locales.conf
+        - name: nfs
+          mountPath: /etc/nginx/dhparam.pem
+          subPath: docker-service/config/nginx/dhparam.pem
+        - name: nfs
+          mountPath: /etc/nginx/nginx.conf
+          subPath: docker-service/config/nginx/nginx.conf
+        - name: nfs
+          mountPath: /etc/nginx/nginxconfig.io
+          subPath: docker-service/config/nginx/nginxconfig.io
+        - name: nfs
+          mountPath: /etc/nginx/sites-available
+          subPath: docker-service/config/nginx/sites-available
+        - name: nfs
+          mountPath: /etc/nginx/sites-enabled
+          subPath: docker-service/config/nginx/sites-enabled
+        - name: nfs
+          mountPath: /usr/local/etc/php/conf.d/adhub.ini
+          subPath: docker-service/config/php-fpm/php.ini
+        - name: nfs
+          mountPath: /usr/local/etc/php-fpm.d/zz-adhub.conf
+          subPath: docker-service/config/php-fpm/zz-adhub.conf
+        - name: nfs
+          mountPath: /etc/supervisor/conf.d
+          subPath: docker-service/config/supervisor.d
+        - name: nfs
+          mountPath: /etc/acho-java
+          subPath: docker-service/config/acho-java
+        - name: nfs
+          mountPath: /etc/td-agent/td-agent.conf
+          subPath: docker-service/config/td-agent/td-agent.conf
+        - name: nfs
+          mountPath: /etc/acho-crontab
+          subPath: docker-service/scripts/acho-crontab
+        - name: nfs
+          mountPath: /docker-entrypoint-init.sh
+          subPath: docker-service/scripts/docker-entrypoint-init.sh
