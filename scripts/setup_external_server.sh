@@ -43,6 +43,9 @@ add-apt-repository \
 apt-get update
 apt-get install -y docker-ce docker-ce-cli containerd.io
 
+curl -L "https://github.com/docker/compose/releases/download/1.24.1/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
+chmod +x /usr/local/bin/docker-compose
+
 # Generate media folders
 mkdir -p \
  /export/ad-hub.net \
@@ -95,10 +98,15 @@ curl -L https://toolbelt.treasuredata.com/sh/install-ubuntu-bionic-td-agent3.sh 
 cp /etc/td-agent/td-agent.conf /etc/td-agent/td-agent.conf.bk
 mkdir -p /var/log/fluent
 chown -R td-agent.td-agent /var/log/fluent
-apt-get install -y make libcurl4-gnutls-dev --yes
-apt-get install -y build-essential
-td-agent-gem install -y fluent-plugin-azure-loganalytics
+apt-get install -y make build-essential libcurl4-gnutls-dev
+td-agent-gem install fluent-plugin-azure-loganalytics
 
+## Crontab for remove log
+croncmd="find /var/log/fluent -mtime +90 -name '*.log.gz' -exec rm -f {} \;"
+cronjob="0 1 * * * ${croncmd}"
+( crontab -l | grep -v -F "${croncmd}" ; echo "${cronjob}" ) | crontab -
+
+## Config file
 cat << EOF > /etc/td-agent/td-agent.conf
 <source>
    @type forward
@@ -269,6 +277,29 @@ systemctl enable td-agent.service
 sed -i -e \
   "$(echo 's/\(\s*- "vmss-external-server:\)[^"]*"/\1'$(hostname -I | awk '{ print $1 }')'"/g')" \
   /ad-hub.net/docker-service/docker-compose.yaml
+
+# Login adhub.azurecr.io
+docker login -u adhub -p 'voYi8whxWjm8izOTEABPWw=R49j=JAGY' adhub.azurecr.io
+ln -s /ad-hub.net/scripts/ah-docker.sh /usr/local/sbin/ah-docker
+
+cat << EOF >> /root/.bashrc
+
+PS1="\[\033[1;33m\]\u\[\033[1;37m\]@\[\033[1;32m\]\h\[\033[1;37m\]:\[\033[1;31m\]\w \[\033[1;36m\]\$ \[\033[0m\]"
+export ENABLE_CROND=yes
+EOF
+
+# Setup git alias
+## 讓 git 指令的輸出結果加上顏色
+git config --global color.ui true
+git config --global core.autocrlf input
+
+## 設定指令的別名
+git config --global alias.co checkout
+git config --global alias.ci commit
+git config --global alias.st status
+git config --global alias.br branch
+git config --global alias.di diff
+git config --global alias.lg "log --all --graph --abbrev-commit --date-order --pretty=format:'%C(bold yellow)%h%C(reset) - %C(bold cyan)%ci%C(reset) %C(bold green)%aN%C(reset) %C(white)%s%C(reset)%C(bold red)%d%C(reset)'"
 
 echo 
 echo "======= Setup completed ======="

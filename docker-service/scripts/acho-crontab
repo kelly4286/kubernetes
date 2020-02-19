@@ -1,0 +1,9 @@
+* * * * * date >> /tmp/test.log
+
+
+###############
+## Warning
+###############
+# 1. Do not delete this block and keep this block at the end of the file.
+# 2. If you need to modify crontab, please edit `docker-service/scripts/acho-crontab`, 
+#    and run `crontab /etc/acho-crontab` in container to apply changes.

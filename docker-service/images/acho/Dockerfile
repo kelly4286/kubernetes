@@ -1,4 +1,4 @@
-FROM    adhubacr.azurecr.io/php:5.6-stretch-fpm-custom
+FROM    adhub.azurecr.io/php:5.6-stretch-fpm-custom
 
 WORKDIR /ad-hub.net/apps
 
@@ -8,7 +8,7 @@ ADD  $OPENJDK /usr/lib/jvm
 RUN set -eux; \
     apt update; \
     curl -sL https://deb.nodesource.com/setup_8.x | bash -; \
-    apt install -y sudo jq vim nodejs net-tools procps inetutils-ping cifs-utils; \
+    apt install -y sudo jq vim nodejs net-tools procps inetutils-ping; \
     curl -sL https://toolbelt.treasuredata.com/sh/install-debian-stretch-td-agent3.sh | sh; \
     sh -c 'for bin in /usr/lib/jvm/jdk-11.0.2/bin/*; do update-alternatives --install /usr/bin/$(basename $bin) $(basename $bin) $bin 100; done'; \
     sh -c 'for bin in /usr/lib/jvm/jdk-11.0.2/bin/*; do update-alternatives --set $(basename $bin) $bin; done'; \
@@ -17,10 +17,9 @@ RUN set -eux; \
 
 ARG  BRANCH_NAME
 COPY fff-og-0.3.9 /usr/local/lib/php/fff-og-0.3.9
-#COPY branchs/$BRANCH_NAME /ad-hub.net/apps/acho
+COPY branchs/$BRANCH_NAME /ad-hub.net/apps/acho
 
 RUN set -eux; \
-    mkdir /ad-hub.net/apps/acho; \
     cd /ad-hub.net/apps/acho; \
     test -e Makefile && make; \
     test -e package.json && npm install; \

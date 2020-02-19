@@ -4,6 +4,7 @@ services:
     php:
         image: adhub.azurecr.io/acho:Empty
         working_dir: /ad-hub.net/apps
+        restart: always
         stop_grace_period: 60s
         ports:
             - 80:80
@@ -24,9 +25,11 @@ services:
             - ./config/supervisor.d:/etc/supervisor/conf.d
             - ./config/acho-java:/etc/acho-java
             - ./config/td-agent/td-agent.conf:/etc/td-agent/td-agent.conf
+            - ./scripts/acho-crontab:/etc/acho-crontab
             - ./scripts/docker-entrypoint-init.sh:/docker-entrypoint-init.sh
         environment:
             - LANG=C.UTF-8
+            - ENABLE_CROND=${ENABLE_CROND}
         extra_hosts:
             - "acho-localhost:127.0.0.1"
             - "vmss-external-server:<EXTERNAL_SERVER_IP>"

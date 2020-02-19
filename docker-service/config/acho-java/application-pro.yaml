@@ -11,7 +11,7 @@ acho:
     service_bus:
       q1:
         queue-name-prefix: acho.pro-
-        connection-string: Endpoint=sb://ah-t-acho-service-bus-01.servicebus.windows.net/;SharedAccessKeyName=RootManageSharedAccessKey;SharedAccessKey=Nq7+n8EQ9nl1WNRbSmxrfCpRxTE8v0BEsJ+6MgyRHbg=
+        connection-string: Endpoint=https://ah-p-acho-service-bus-01.servicebus.windows.net/;SharedAccessKeyName=RootManageSharedAccessKey;SharedAccessKey=Bm3CBliTbAxMLFDls9Y/Z/pTPBhp4MdLzHaZFzj4258=
         receive-mode: RECEIVEANDDELETE
   queue-default:
     service-bus-name: q1
@@ -48,5 +48,21 @@ acho:
       minimum-flush-time: 200
     WebhookFileQueue:
       url-params: className=WebhookFileQueue
+      number-per-batch: 200
+      minimum-flush-time: 200
+    AppendPlacementLogWithUidFileQueue:
+      url-params: className=AppendPlacementLogWithUidFileQueue
+      number-per-batch: 200
+      minimum-flush-time: 200
+    SubmitSurveyAnswerWithUidFileQueue:
+      url-params: className=SubmitSurveyAnswerWithUidFileQueue
+      number-per-batch: 200
+      minimum-flush-time: 200
+    AddFriendQRCodeFileQueue:
+      url-params: className=AddFriendQRCodeFileQueue
+      number-per-batch: 200
+      minimum-flush-time: 200
+    FriendAndChannelFriendMapFileQueue:
+      url-params: className=FriendAndChannelFriendMapFileQueue
       number-per-batch: 200
       minimum-flush-time: 200

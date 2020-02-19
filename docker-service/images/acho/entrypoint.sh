@@ -2,7 +2,14 @@
 set -e
 
 if [ -f "/docker-entrypoint-init.sh" ]; then
-    . /docker-entrypoint-init.sh
+    f=/docker-entrypoint-init.sh
+    if [ -x "$f" ]; then
+        echo "$0: running $f"
+        "$f"
+    else
+        echo "$0: sourcing $f"
+        . "$f"
+    fi
 fi
 
 # Run command

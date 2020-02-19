@@ -1,7 +1,7 @@
 server:
-  port: 8081
+  port: 8080
 logging:
-  file: /var/log/apps-java/acho-java_beta.log
+  file: /var/log/apps-java/acho-java_dev.log
   config: classpath:logback-file.xml
   level:
     net.adhub.acho.controller.QueueController: INFO
@@ -10,13 +10,13 @@ acho:
   azure:
     service_bus:
       q1:
-        queue-name-prefix: acho.beta-
+        queue-name-prefix: acho.dev-
         connection-string: Endpoint=https://ah-p-acho-service-bus-01.servicebus.windows.net/;SharedAccessKeyName=RootManageSharedAccessKey;SharedAccessKey=Bm3CBliTbAxMLFDls9Y/Z/pTPBhp4MdLzHaZFzj4258=
         receive-mode: RECEIVEANDDELETE
   queue-default:
     service-bus-name: q1
-    working-directory: /ad-hub.net/apps/line_beta
-    url: https://acho-localhost/acho_beta/api/processQueue/
+    working-directory: /ad-hub.net/apps/line_pro
+    url: https://acho-localhost/acho/api/processQueue/
     number-per-batch: 10000
     minimum-flush-time: 60000
     thread-pool-size: 20

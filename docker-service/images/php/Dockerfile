@@ -2,8 +2,7 @@
 # docker push adhub.azurecr.io/php:5.6-stretch-fpm-custom
 FROM php:5.6-fpm-stretch
 
-#export RUNTIME_DEPS="git wget nginx cron rsyslog supervisor logrotate libgeoip1 imagemagick libmagickwand-6.q16-3"
-ENV RUNTIME_DEPS git wget nginx cron rsyslog supervisor libgeoip1 imagemagick libmagickwand-6.q16-3
+ENV RUNTIME_DEPS git wget nginx cron rsyslog supervisor logrotate libgeoip1 imagemagick libmagickwand-6.q16-3
 
 RUN set -eux; \
     rm -rf /etc/localtime; \

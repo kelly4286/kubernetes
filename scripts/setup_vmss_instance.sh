@@ -44,7 +44,7 @@ mount -a
 cat /ad-hub.net/docker-service/ext-id_rsa.pub > /root/.ssh/authorized_keys
 docker login -u adhub -p 'voYi8whxWjm8izOTEABPWw=R49j=JAGY' adhub.azurecr.io
 
-ln -s /ad-hub.net/docker-service/scripts/ah-docker.sh /usr/local/sbin/ah-docker
+ln -s /ad-hub.net/scripts/ah-docker.sh /usr/local/sbin/ah-docker
 
 #docker run --name kuard -d -p 80:8080 gcr.io/kuar-demo/kuard-amd64:blue
 cd /ad-hub.net/docker-service

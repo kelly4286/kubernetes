@@ -1,4 +1,7 @@
 #!/bin/bash
 
-#cp /ad-hub.net/apps/acho/config.php /ad-hub.net/apps/line_pro/config.php
-
+if [ "${ENABLE_CROND}" == "yes" ]; then
+   crontab /etc/acho-crontab
+else
+   echo "Ignore crontab!"
+fi
