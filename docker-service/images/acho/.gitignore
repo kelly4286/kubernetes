@@ -1,0 +1,4 @@
+.dockerignore
+openjdk-*.gz
+branchs
+fff-og-*

@@ -1,0 +1,32 @@
+version: "3"
+
+services:
+    php:
+        image: adhub.azurecr.io/acho:Empty
+        working_dir: /ad-hub.net/apps
+        stop_grace_period: 60s
+        ports:
+            - 80:80
+            - 443:443
+        volumes:
+            - /etc/letsencrypt:/etc/letsencrypt
+            - /ad-hub.net/media:/ad-hub.net/media
+            - /ad-hub.net/apps:/ad-hub.net/apps
+            - ./config/freetds/locales.conf:/usr/local/etc/locales.conf
+            - ./config/freetds/freetds.conf:/usr/local/etc/freetds.conf
+            - ./config/nginx/dhparam.pem:/etc/nginx/dhparam.pem
+            - ./config/nginx/nginx.conf:/etc/nginx/nginx.conf
+            - ./config/nginx/nginxconfig.io:/etc/nginx/nginxconfig.io
+            - ./config/nginx/sites-available:/etc/nginx/sites-available
+            - ./config/nginx/sites-enabled:/etc/nginx/sites-enabled
+            - ./config/php-fpm/php.ini:/usr/local/etc/php/conf.d/adhub.ini
+            - ./config/php-fpm/zz-adhub.conf:/usr/local/etc/php-fpm.d/zz-adhub.conf
+            - ./config/supervisor.d:/etc/supervisor/conf.d
+            - ./config/acho-java:/etc/acho-java
+            - ./config/td-agent/td-agent.conf:/etc/td-agent/td-agent.conf
+            - ./scripts/docker-entrypoint-init.sh:/docker-entrypoint-init.sh
+        environment:
+            - LANG=C.UTF-8
+        extra_hosts:
+            - "acho-localhost:127.0.0.1"
+            - "vmss-external-server:<EXTERNAL_SERVER_IP>"

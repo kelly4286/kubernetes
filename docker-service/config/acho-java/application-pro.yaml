@@ -1,0 +1,52 @@
+server:
+  port: 8080
+logging:
+  file: /var/log/apps-java/acho-java_pro.log
+  config: classpath:logback-file.xml
+  level:
+    net.adhub.acho.controller.QueueController: INFO
+    net.adhub.acho.queue.QueueHandler: INFO
+acho:
+  azure:
+    service_bus:
+      q1:
+        queue-name-prefix: acho.pro-
+        connection-string: Endpoint=sb://ah-t-acho-service-bus-01.servicebus.windows.net/;SharedAccessKeyName=RootManageSharedAccessKey;SharedAccessKey=Nq7+n8EQ9nl1WNRbSmxrfCpRxTE8v0BEsJ+6MgyRHbg=
+        receive-mode: RECEIVEANDDELETE
+  queue-default:
+    service-bus-name: q1
+    working-directory: /ad-hub.net/apps/line_pro
+    url: https://acho-localhost/acho/api/processQueue/
+    number-per-batch: 10000
+    minimum-flush-time: 60000
+    thread-pool-size: 20
+    consume: true
+  queues:
+    AppendPlacementLogFileQueue:
+      url-params: className=AppendPlacementLogFileQueue
+    AppendRichMessageKeywordRelatedActionPlacementLogFileQueue:
+      url-params: className=AppendRichMessageKeywordRelatedActionPlacementLogFileQueue
+    FriendTagMapFileQueue:
+      url-params: className=FriendTagMapFileQueue
+    KeywordGroupAddBindingTagsToFriendsFileQueue:
+      url-params: className=KeywordGroupAddBindingTagsToFriendsFileQueue
+    KeywordRequestLogFileQueue:
+      url-params: className=KeywordRequestLogFileQueue
+    RefHandlerFileQueue:
+      url-params: className=RefHandlerFileQueue
+    RequestRedirectExternalRedirectFileQueue:
+      url-params: className=RequestRedirectExternalRedirectFileQueue
+    TagClicksLogFileQueue:
+      url-params: className=TagClicksLogFileQueue
+    WebhookEventFollowAndUnfolowFileQueue:
+      url-params: className=WebhookEventFollowAndUnfolowFileQueue
+      number-per-batch: 100
+      minimum-flush-time: 200
+    WebhookEventSendMessageRequestFileQueue:
+      url-params: className=WebhookEventSendMessageRequestFileQueue
+      number-per-batch: 200
+      minimum-flush-time: 200
+    WebhookFileQueue:
+      url-params: className=WebhookFileQueue
+      number-per-batch: 200
+      minimum-flush-time: 200
