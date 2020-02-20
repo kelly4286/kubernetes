@@ -11,7 +11,7 @@ acho:
     service_bus:
       q1:
         queue-name-prefix: acho.dev-
-        connection-string: Endpoint=https://ah-p-acho-service-bus-01.servicebus.windows.net/;SharedAccessKeyName=RootManageSharedAccessKey;SharedAccessKey=Bm3CBliTbAxMLFDls9Y/Z/pTPBhp4MdLzHaZFzj4258=
+        connection-string: Endpoint=https://ah-t-acho-service-bus-01.servicebus.windows.net/;SharedAccessKeyName=RootManageSharedAccessKey;SharedAccessKey=Bm3CBliTbAxMLFDls9Y/Z/pTPBhp4MdLzHaZFzj4258=
         receive-mode: RECEIVEANDDELETE
   queue-default:
     service-bus-name: q1

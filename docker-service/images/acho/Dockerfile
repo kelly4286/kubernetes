@@ -1,4 +1,4 @@
-FROM    adhub.azurecr.io/php:5.6-stretch-fpm-custom
+FROM    adhubtest.azurecr.io/php:5.6-stretch-fpm-custom
 
 WORKDIR /ad-hub.net/apps
 
@@ -15,34 +15,13 @@ RUN set -eux; \
     apt-get purge -y --auto-remove -o APT::AutoRemove::RecommendsImportant=false; \
     rm -rf /var/lib/apt/lists/*
 
-ARG  BRANCH_NAME
 COPY fff-og-0.3.9 /usr/local/lib/php/fff-og-0.3.9
-COPY branchs/$BRANCH_NAME /ad-hub.net/apps/acho
 
 RUN set -eux; \
+    mkdir /ad-hub.net/apps/acho; \
     cd /ad-hub.net/apps/acho; \
     test -e Makefile && make; \
     test -e package.json && npm install; \
-    # cd /ad-hub.net/apps/acho ; \
-    # make k8s-test; \
-    # mkdir /ad-hub.net/media; \
-    # cd /ad-hub.net/media; \
-    # mkdir line_carousel_images \
-    #       line_channel_pictures \
-    #       line_chat_images \
-    #       line_coupon_images \
-    #       line_crop_images \
-    #       acho_file_queue \
-    #       line_imagemap \
-    #       acho_job \
-    #       acho_locks \
-    #       messageRequestChunks \
-    #       line_message_image \
-    #       line_rich_menu_images \
-    #       line_survey_images \
-    #       line_tools \
-    #       line_images \
-    #       line_videos; \
     mkdir -p /var/log/apps /var/lib/php/upload_tmp_dir; \
     chown -R www-data:www-data /var/log/apps /var/lib/php/upload_tmp_dir; \
     ln -sf /usr/local/lib/php/fff-og-0.3.9/fff.php /usr/local/lib/php/fff.php

@@ -1,8 +1,8 @@
-# docker build . -t adhub.azurecr.io/php:5.6-stretch-fpm-custom
-# docker push adhub.azurecr.io/php:5.6-stretch-fpm-custom
+# docker build --no-cache . -t adhubtest.azurecr.io/php:5.6-stretch-fpm-custom
+# docker push adhubtest.azurecr.io/php:5.6-stretch-fpm-custom
 FROM php:5.6-fpm-stretch
 
-ENV RUNTIME_DEPS git wget nginx cron rsyslog supervisor logrotate libgeoip1 imagemagick libmagickwand-6.q16-3
+ENV RUNTIME_DEPS git wget nginx cron rsyslog supervisor logrotate libgeoip1 imagemagick libmagickwand-6.q16-3 ffmpeg mailutils
 
 RUN set -eux; \
     rm -rf /etc/localtime; \
