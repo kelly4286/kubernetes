@@ -40,7 +40,7 @@ spec:
         persistentVolumeClaim:
           claimName: nfs-pvc
       hostAliases:
-      - ip: "10.240.0.6"  #change to external server's private ip
+      - ip: "10.240.0.66"  #change to external server's private ip
         hostnames:
         - "external-server"
       - ip: "127.0.0.1"
@@ -48,7 +48,7 @@ spec:
         - "acho-localhost"
       containers:
       - name: acho-web
-        image: adhubacr.azurecr.io/acho:EN-0.1
+        image: adhubtest.azurecr.io/acho:0.1
         imagePullPolicy: IfNotPresent
         env:
         - name: LANG
