@@ -1,8 +1,28 @@
 #!/bin/bash
-
-if [ "$#" == 0 ]; then
-    echo "Command usage: $0 <COMMAND> <COMMAND_OPTIONS...>"
+function vmss_help(){
+    echo
+    echo "Usage: vmss <COMMAND> <COMMAND_OPTIONS...>"
+    echo
+    echo "Commands:"
+    echo -e "    help                        : Show this help message and exit."
+    echo -e "    info                        : Get information about the VMSS."
+    echo -e "    ips                         : List the IP address of each VMSS instance."
+    echo -e "    run [<OPTIONS>]             : SSH to each VMSS instance or execute a command (<OPTIONS>) in each VMSS instance."
+    echo -e "    scale <NUMBER>              : Change the number of VMs within the VMSS. (Note: Use \`\E[1;37;40mshutdown\E[0m\` to scale to 0.)"
+    echo -e "    shutdown                    : Shutdown each of VMSS instance."
+    echo -e "    update-initial-script       : Update the initial custom scripts for each VMSS instance."
+    echo
+    echo -e "    acho-release                : Execute \`\E[1;37;40macho-release\E[0m\` scripts in each Docker container."
+    echo -e "    crontab <OPTIONS>           : Execute crontab command in external Docker container."
+    echo -e "    nginx <OPTIONS>             : Execute nginx commands in each Docker container. Useful for the config reload: \`\E[1;37;40mnginx -s reload\E[0m\`."
+    echo -e "    supervisor <OPTIONS>        : Execute \`\E[1;37;40msupervisorctl\E[0m\` command in each Docker container."
+    echo -e "                                  See \E[4;37;40mhttp://supervisord.org/running.html#supervisorctl-actions\E[0m for more information."
+    echo
     exit 1
+}
+
+if [ "$#" == 0 ] || [ "$1" = "help" ] || [ "$1" = "-h" ]; then
+    vmss_help
 fi
 
 # Get Command
@@ -103,13 +123,27 @@ function vm_run(){
         echo $?
         echo "Task finish in ${ip}"
         echo
-        sleep 15
     done
     stop_ssh_agent
 }
 
 function update_initial_script(){
-    script=$(cat /ad-hub.net/scripts/setup_vmss_instance.sh | sed "s/<EXTERNAL_SERVER_IP>/$(hostname -I | awk '{ print $1 }')/g" | gzip -9 | base64 -w 0)
+    if [ -z ${VMSS_ENV} ]; then
+        echo "[ERROR] VMSS_ENV is not set. Please setup the env variable 'VMSS_ENV' first."
+        exit 0
+    fi
+
+    if [ ${VMSS_ENV} == "vmss-pro" ]; then
+        bashrc_ps="\[\033[1;33m\]\[\033[1;41m\][PRO!]\[\033[40m\] \u\[\033[1;37m\]@\[\033[1;32m\]\h\[\033[1;37m\]: \[\033[1;31m\]\w \[\033[1;36m\]\$ \[\033[0m\]"
+    else
+        bashrc_ps="\[\033[1;33m\]\u\[\033[1;37m\]@\[\033[1;32m\]\h\[\033[1;37m\]:\[\033[1;31m\]\w \[\033[1;36m\]\$ \[\033[0m\]"
+    fi
+
+    script=$(cat /ad-hub.net/scripts/setup_vmss_instance.sh \
+        | sed "s/<EXTERNAL_SERVER_IP>/$(hostname -I | awk '{ print $1 }')/g" \
+        | sed "s/<VMSS_ENV>/${VMSS_ENV}/g" \
+        | sed "s/<BASHRC_PS1>/$(printf '%s\n' "$bashrc_ps" | sed 's:[\/&]:\\&:g;$!s/$/\\/')/g" \
+        | gzip -9 | base64 -w 0)
 
     echo $script | base64 -di | gunzip
     echo
@@ -146,6 +180,23 @@ function exec_supervisor(){
     fi
 }
 
+function acho_release(){
+    ah-docker exec -T -e VMSS_ENV=${VMSS_ENV} php bash /etc/acho-scripts/acho-release.sh;
+    printf "\n########## Restart php-fpm in external container ##########\n\n";
+    ah-docker exec -T php supervisorctl restart php-fpm;
+    printf "\n########## Restart php-fpm in vmss container ##########\n\n";
+    vm_run ah-docker exec -T php supervisorctl restart php-fpm;
+}
+
+function exec_nginx(){
+    vm_run ah-docker exec -T php nginx $*
+}
+
+function acho_crontab(){
+    docker-compose -f /ad-hub.net/docker-service/docker-compose.yaml exec php crontab $*;
+    docker-compose -f /ad-hub.net/docker-service/docker-compose.yaml exec -T php crontab -l > /ad-hub.net/docker-service/scripts/acho-crontab;
+}
+
 # Command dispatch
 case "${command}" in
     "info")
@@ -164,7 +215,7 @@ case "${command}" in
         vm_run $*
         ;;
     
-    "update_initial_script")
+    "update-initial-script")
         update_initial_script
         ;;
 
@@ -174,6 +225,22 @@ case "${command}" in
 
     "supervisor")
         exec_supervisor $*
+        ;;
+
+    "acho-release")
+        acho_release
+        ;;
+
+    "nginx")
+        exec_nginx $*
+        ;;
+
+    "crontab")
+        acho_crontab $*
+        ;;
+
+    *)
+        vmss_help
         ;;
 esac
 echo

@@ -1,6 +1,9 @@
 #!/bin/sh
 
-# Install Docker and Docker compose
+# Wait 300 seconds
+sleep 300
+
+# Install Docker, Docker Compose and dependent packages
 apt-get update
 apt-get -y upgrade
 
@@ -28,6 +31,11 @@ chmod +x /usr/local/bin/docker-compose
 # Add ip of external server to /etc/hosts
 echo "<EXTERNAL_SERVER_IP>  vmss-external-server" >> /etc/hosts
 
+# Install Mail
+echo "postfix postfix/mailname string support@ad-hub.net" | debconf-set-selections
+echo "postfix postfix/main_mailer_type string 'Internet Site'" | debconf-set-selections
+apt-get install -y mailutils
+
 # Setup NFS
 apt-get install -y nfs-common
 
@@ -40,6 +48,25 @@ echo "vmss-external-server:/export/letsencrypt /etc/letsencrypt nfs _netdev,defa
 mkdir -p /ad-hub.net /etc/letsencrypt
 mount -a
 
+# Setup Swap
+fallocate -l 4G /mnt/swapfile
+chmod 600 /mnt/swapfile
+mkswap /mnt/swapfile
+swapon /mnt/swapfile
+echo "/mnt/swapfile    none    swap    sw    0    0" >> /etc/fstab
+
+## Crontab for disk usage checking
+croncmd="/bin/sh /ad-hub.net/scripts/check_disk_usage.sh;"
+cronjob="0 * * * * ${croncmd}"
+( crontab -l | grep -v -F "${croncmd}" ; echo "${cronjob}" ) | crontab -
+
+# Setup bash color and environments
+cat << EOF >> /root/.bashrc
+
+PS1="<BASHRC_PS1>"
+export VMSS_ENV=<VMSS_ENV>
+EOF
+
 # Login
 cat /ad-hub.net/docker-service/ext-id_rsa.pub > /root/.ssh/authorized_keys
 docker login -u adhub -p 'voYi8whxWjm8izOTEABPWw=R49j=JAGY' adhub.azurecr.io
@@ -47,5 +74,5 @@ docker login -u adhub -p 'voYi8whxWjm8izOTEABPWw=R49j=JAGY' adhub.azurecr.io
 ln -s /ad-hub.net/scripts/ah-docker.sh /usr/local/sbin/ah-docker
 
 #docker run --name kuard -d -p 80:8080 gcr.io/kuar-demo/kuard-amd64:blue
-cd /ad-hub.net/docker-service
-docker-compose up -d
+export VMSS_ENV=<VMSS_ENV>
+/usr/local/sbin/ah-docker up -d

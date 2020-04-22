@@ -1,0 +1,12 @@
+/var/log/apps/*log
+/var/log/apps-java/*log
+{
+    sharedscripts
+    create 666 root root
+    notifempty
+    daily
+    dateext
+    rotate 30
+    missingok
+    compress
+}

@@ -1,0 +1,15 @@
+/var/log/auth.log
+/var/log/cron.log
+/var/log/messages
+{
+   weekly
+   rotate 4
+   missingok
+   compress
+   delaycompress
+   notifempty
+   sharedscripts
+   postrotate
+      /usr/lib/rsyslog/rsyslog-rotate
+   endscript
+}

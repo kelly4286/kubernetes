@@ -12,6 +12,13 @@ fi
 ENABLE_CROND=${ENABLE_CROND} /usr/local/bin/docker-compose "$@"
 
 LAST=$?
+
+# Wait for graceful shutdown
+if [ "$1" = "restart" ]; then
+    echo "Wait 15 seconds for graceful shutdown..."
+    sleep 15
+fi
+
 echo $LAST
 echo "[$(date '+%Y-%m-%d %H:%M:%S')] Execution completed."
 echo

@@ -1,0 +1,2 @@
+Defaults  env_keep="VMSS_ENV ENABLE_CROND"
+adhub  ALL=(ALL)  ALL, !/bin/bash, /bin/bash -c *, !/ad-hub.net/scripts/vmss.sh run, /ad-hub.net/scripts/vmss.sh run *

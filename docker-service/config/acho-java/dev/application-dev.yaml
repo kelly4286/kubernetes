@@ -1,0 +1,72 @@
+server:
+  port: 8083
+logging:
+  file: /var/log/apps-java/acho-java_dev.log
+  config: classpath:logback-dev-file.xml
+  level:
+    net.adhub.acho.controller.QueueController: INFO
+    net.adhub.acho.queue.QueueHandler: INFO
+acho:
+  azure:
+    service_bus:
+      q1:
+        queue-name-prefix: acho.dev-
+        connection-string: Endpoint=https://ah-p-acho-service-bus-01.servicebus.windows.net/;SharedAccessKeyName=RootManageSharedAccessKey;SharedAccessKey=Bm3CBliTbAxMLFDls9Y/Z/pTPBhp4MdLzHaZFzj4258=
+        receive-mode: RECEIVEANDDELETE
+  queue-default:
+    service-bus-name: q1
+    working-directory: /ad-hub.net/apps/line_dev
+    url: http://acho-localhost/line_dev/api/processQueue/
+    number-per-batch: 10000
+    minimum-flush-time: 60000
+    thread-pool-size: 20
+    consume: true
+  queues:
+    AppendPlacementLogFileQueue:
+      url-params: className=AppendPlacementLogFileQueue
+    AppendRichMessageKeywordRelatedActionPlacementLogFileQueue:
+      url-params: className=AppendRichMessageKeywordRelatedActionPlacementLogFileQueue
+    FriendTagMapFileQueue:
+      url-params: className=FriendTagMapFileQueue
+    KeywordGroupAddBindingTagsToFriendsFileQueue:
+      url-params: className=KeywordGroupAddBindingTagsToFriendsFileQueue
+    KeywordRequestLogFileQueue:
+      url-params: className=KeywordRequestLogFileQueue
+    RefHandlerFileQueue:
+      url-params: className=RefHandlerFileQueue
+    RequestRedirectExternalRedirectFileQueue:
+      url-params: className=RequestRedirectExternalRedirectFileQueue
+      number-per-batch: 200
+      minimum-flush-time: 200
+    TagClicksLogFileQueue:
+      url-params: className=TagClicksLogFileQueue
+    WebhookEventFollowAndUnfolowFileQueue:
+      url-params: className=WebhookEventFollowAndUnfolowFileQueue
+      number-per-batch: 100
+      minimum-flush-time: 200
+    WebhookEventSendMessageRequestFileQueue:
+      url-params: className=WebhookEventSendMessageRequestFileQueue
+      number-per-batch: 200
+      minimum-flush-time: 200
+    WebhookFileQueue:
+      url-params: className=WebhookFileQueue
+      number-per-batch: 200
+      minimum-flush-time: 200
+    AppendPlacementLogWithUidFileQueue:
+      url-params: className=AppendPlacementLogWithUidFileQueue
+      number-per-batch: 200
+      minimum-flush-time: 200
+    SubmitSurveyAnswerWithUidFileQueue:
+      url-params: className=SubmitSurveyAnswerWithUidFileQueue
+      number-per-batch: 200
+      minimum-flush-time: 200
+    AddFriendQRCodeFileQueue:
+      url-params: className=AddFriendQRCodeFileQueue
+      number-per-batch: 200
+      minimum-flush-time: 200
+    FriendAndChannelFriendMapFileQueue:
+      url-params: className=FriendAndChannelFriendMapFileQueue
+      number-per-batch: 200
+      minimum-flush-time: 200
+    RedirectUrlCountFileQueue:
+      url-params: className=RedirectUrlCountFileQueue

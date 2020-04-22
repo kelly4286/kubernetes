@@ -1,8 +1,8 @@
-# docker build --no-cache . -t adhubtest.azurecr.io/php:5.6-stretch-fpm-custom
-# docker push adhubtest.azurecr.io/php:5.6-stretch-fpm-custom
+# docker build . -t adhub.azurecr.io/php:5.6-stretch-fpm-custom
+# docker push adhub.azurecr.io/php:5.6-stretch-fpm-custom
 FROM php:5.6-fpm-stretch
 
-ENV RUNTIME_DEPS git wget nginx cron rsyslog supervisor logrotate libgeoip1 imagemagick libmagickwand-6.q16-3 ffmpeg mailutils
+ENV RUNTIME_DEPS git less wget nginx cron rsyslog supervisor logrotate libgeoip1 imagemagick libmagickwand-6.q16-3 ffmpeg mailutils gettext locales
 
 RUN set -eux; \
     rm -rf /etc/localtime; \
@@ -26,7 +26,6 @@ RUN set -eux; \
         libfreetype6-dev libjpeg62-turbo-dev \
         build-essential libc6-dev \
         $RUNTIME_DEPS; \
-    echo "cron.* /var/log/cron.log" > /etc/rsyslog.d/cron.conf; \
     ln -s /usr/lib/x86_64-linux-gnu/libsybdb.so /usr/lib/; \
     \
     # Build FreeTDS 1.1.6
@@ -73,38 +72,30 @@ RUN set -eux; \
      | sort -u \
      | xargs -r apt-mark manual; \
     apt-get purge -y --auto-remove -o APT::AutoRemove::RecommendsImportant=false; \
-    rm -rf /var/lib/apt/lists/* /tmp/pear /opt/freetds-1.1.6* /etc/logrotate.d; \
-	{ \
-        echo 'daily'; \
-        echo 'rotate 7'; \
-        echo 'dateext'; \
-        echo 'create 666 root root'; \
-        echo ''; \
-        echo 'missingok'; \
-        echo 'notifempty'; \
-        echo 'compress'; \
-        echo 'delaycompress'; \
-        echo ''; \
-        echo '/var/log/apps/*.log'; \
-        echo '/var/log/nginx/*.log'; \
-        echo '/var/log/php-fpm/*.log'; \
-        echo '{'; \
-        echo '}'; \
-	} > /etc/logrotate.conf; \
+    rm -rf /var/lib/apt/lists/* /tmp/pear /opt/freetds-1.1.6*; \
     \
     php --version; \
     nginx -v; \
-    supervisord -v; \
+    supervisord -v;
+
+RUN set -eux; \
+    echo "cron.* /var/log/cron.log" > /etc/rsyslog.d/cron.conf; \
+    \
+    # Generates localisation files from templates
+    cat /usr/share/i18n/SUPPORTED | egrep '^(zh_TW|ja_JP)' >> /etc/locale.gen; \
+    locale-gen; \
     \
     mv /etc/nginx/conf.d/default.conf /etc/nginx/conf.d/default.conf_origin; \
     echo -e "<?php\nphpinfo();" > /usr/share/nginx/html/phpinfo.php; \
     mkdir -p /var/log/php-fpm; \
     chown www-data:www-data /var/log/php-fpm; \
     sed -i 's/user  nginx;/user  www-data;/g' /etc/nginx/nginx.conf; \
-    sed -i 's/error_log = \/proc\/self\/fd\/2/error_log = \/var\/log\/php-fpm\/error.log/g' /usr/local/etc/php-fpm.d/docker.conf; \
+    sed -i 's/error_log = \/proc\/self\/fd\/2/pid = \/var\/run\/php-fpm.pid\nerror_log = \/var\/log\/php-fpm\/error.log/g' /usr/local/etc/php-fpm.d/docker.conf; \
     sed -i 's/access.log = \/proc\/self\/fd\/2/access.log = \/var\/log\/php-fpm\/access.log/g' /usr/local/etc/php-fpm.d/docker.conf;
 
 WORKDIR /usr/share/nginx/html
+
+COPY logrotate.d/. /etc/logrotate.d/
 COPY supervisord.conf /etc/supervisor/supervisord.conf
 COPY nginx-default.conf /etc/nginx/conf.d/default.conf
 
