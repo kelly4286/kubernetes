@@ -4,7 +4,7 @@ metadata:
   name: nfs-pv
 spec:
   capacity:
-    storage: 100Gi
+    storage: 30Gi
   volumeMode: Filesystem
   accessModes:
     - ReadWriteMany
@@ -14,7 +14,7 @@ spec:
     - hard
     - nfsvers=4.1
   nfs:
-    server: 10.240.0.66  #change to external server's private ip
+    server: 10.19.16.4  #change to external server's private ip
     path: /ad-hub.net
 
 ---
@@ -29,4 +29,4 @@ spec:
   storageClassName: "nfs"
   resources:
     requests:
-      storage: 100Gi
+      storage: 30Gi

@@ -1,11 +1,9 @@
 kind: Service
 apiVersion: v1
 metadata:
-  annotations:
-    service.beta.kubernetes.io/azure-load-balancer-resource-group: mc_adhub-kubernetestest_ahk8scluster_japaneast
   name: acho-web-service
 spec:
-  loadBalancerIP: 52.140.238.178
+  loadBalancerIP: 13.78.65.111
   type: LoadBalancer
   ports:
     - name: www
