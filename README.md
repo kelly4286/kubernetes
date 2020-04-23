@@ -112,10 +112,10 @@
     az acr login --name adhub
    
     # 取得 Kubernetes 叢集認證
-    az aks get-credentials --resource-group adHub_KubernetesTest --name ah-t-k8s
+    az aks get-credentials --resource-group adHub_KubernetesTest --name adHubK8sTest
    
     # 將 K8S 與 Container Registry 建立連結 (需要跑一陣子)
-    az aks update -n ah-t-k8s -g adHub_KubernetesTest --attach-acr adhub
+    az aks update -n adHubK8sTest -g adHub_KubernetesTest --attach-acr adhub
    
     ########(使用 Azure File Share 才需要) 建立 Kubernetes Secret 並儲存在某個 Storage Account
     kubectl create secret generic azure-secret --from-literal azurestorageaccountname=ahstorageaccount --from-literal azurestorageaccountkey="04YYW93U5jDlY3jwODY2KOPoIKdv9v//wd5BhfdTwrDBSNs5Z7bkb//pJ7qTtj1XWRpJXoCCquoy9d7hwGZy3A==" --type=Opaque

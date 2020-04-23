@@ -66,28 +66,28 @@ spec:
         volumeMounts:
         - name: nfs
           mountPath: /docker-entrypoint-init.sh
-          subPath: docker-service/scripts/docker-entrypoint-init.sh
-#        - name: nfs
-#          mountPath: /etc/letsencrypt
-#          subPath: /etc/letsencrypt
+          subPath: ad-hub.net/docker-service/scripts/docker-entrypoint-init.sh
+        - name: nfs
+          mountPath: /etc/letsencrypt
+          subPath: letsencrypt
         - name: nfs
           mountPath: /ad-hub.net/apps
-          subPath: apps
+          subPath: ad-hub.net/apps
         - name: nfs
           mountPath: /ad-hub.net/media
-          subPath: media
+          subPath: ad-hub.net/media
         - name: nfs
           mountPath: /etc/acho-scripts
-          subPath: docker-service/scripts
+          subPath: ad-hub.net/docker-service/scripts
         - name: nfs
           mountPath: /etc/service-configs
-          subPath: docker-service/config
+          subPath: ad-hub.net/docker-service/config
         - name: nfs
           mountPath: /etc/acho-java
-          subPath: docker-service/config/acho-java/${VMSS_ENV:-dev}
+          subPath: ad-hub.net/docker-service/config/acho-java/$(VMSS_ENV)
         - name: nfs
           mountPath: /etc/nginx/sites-enabled
-          subPath: docker-service/config/nginx/sites-available/${VMSS_ENV:-dev}
+          subPath: ad-hub.net/docker-service/config/nginx/sites-available/$(VMSS_ENV)
         - name: nfs
           mountPath: /etc/supervisor/conf.d
-          subPath: docker-service/config/supervisor.d/${VMSS_ENV:-dev}
+          subPath: ad-hub.net/docker-service/config/supervisor.d/$(VMSS_ENV)

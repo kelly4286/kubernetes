@@ -15,7 +15,7 @@ spec:
     - nfsvers=4.1
   nfs:
     server: 10.19.16.4  #change to external server's private ip
-    path: /ad-hub.net
+    path: /
 
 ---
 
