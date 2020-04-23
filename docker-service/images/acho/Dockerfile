@@ -1,4 +1,4 @@
-FROM    adhub.azurecr.io/php:5.6-stretch-fpm-custom
+FROM    adhub.azurecr.io/k8s-php:5.6-stretch-fpm-custom
 
 WORKDIR /ad-hub.net/apps
 

@@ -24,8 +24,8 @@
     sudo -i
    
     # 設定 bash color
-    # PS1="\[\033[1;33m\]\[\033[1;41m\][WARNING!!這台是PROD!!]\[\033[40m\] \u\[\033[1;37m\]@\[\033[1;32m\]\h\[\033[1;37m\]:\[\033[1;31m\]\w \[\033[1;36m\]\$ \[\033[0m\]"
-    # PS1="\[\033[40m\] \u\[\033[1;37m\]@\[\033[1;32m\]\h\[\033[1;37m\]:\[\033[1;31m\]\w \[\033[1;36m\]\$ \[\033[0m\]"
+    # PS1="\[\033[1;33m\]\[\033[1;41m\][PRO!]\[\033[40m\] \u\[\033[1;37m\]@\[\033[1;32m\]\h\[\033[1;37m\]: \[\033[1;31m\]\w \[\033[1;36m\]\$ \[\033[0m\]"
+    # PS1="\[\033[1;33m\]\u\[\033[1;37m\]@\[\033[1;32m\]\h\[\033[1;37m\]:\[\033[1;31m\]\w \[\033[1;36m\]\$ \[\033[0m\]"
     vim /root/.bashrc
 
     # 設定 Timezone
@@ -64,277 +64,16 @@
     df -h
 
     # 把這個專案放到 /ad-hub.net
-    git clone https://github.com/kelly4286/kubernetes.git
+    git clone https://github.com/kelly4286/kubernetes.git -b k8s
     cp -a kubernetes/* /ad-hub.net/
     rm -rf kubernetes
    
-    # Setup git alias
-    ## 讓 git 指令的輸出結果加上顏色
-    git config --global color.ui true
-    git config --global core.autocrlf input
-    
-    ## 設定指令的別名
-    git config --global alias.co checkout
-    git config --global alias.ci commit
-    git config --global alias.st status
-    git config --global alias.br branch
-    git config --global alias.di diff
-    git config --global alias.lg "log --all --graph --abbrev-commit --date-order --pretty=format:'%C(bold yellow)%h%C(reset) - %C(bold cyan)%ci%C(reset) %C(bold green)%aN%C(reset) %C(white)%s%C(reset)%C(bold red)%d%C(reset)'"
-
-    ### Install Dependencies
-    apt update
-    apt install -y jq make memcached nfs-kernel-server software-properties-common
-    ### Install Nodejs
-    curl -sL https://deb.nodesource.com/setup_8.x | bash -
-    apt-get install -y nodejs
-    ### Install Azure CLI
-    curl -sL https://aka.ms/InstallAzureCLIDeb | sudo bash
-    ### Install Docker
-    apt-get remove docker docker-engine containerd runc
-    apt-get update
-    apt-get install -y \
-        apt-transport-https \
-        ca-certificates \
-        curl \
-        gnupg-agent \
-        software-properties-common \
-        docker.io
-    curl -fsSL https://download.docker.com/linux/ubuntu/gpg | apt-key add -
-    apt-key fingerprint 0EBFCD88
-    add-apt-repository \
-      "deb [arch=amd64] https://download.docker.com/linux/ubuntu \
-      $(lsb_release -cs) \
-      stable"
-    apt-get install -y docker-ce docker-ce-cli containerd.io
-    
-    ### Generate media folders
-    mkdir -p \
-        /export/ad-hub.net \
-        /export/letsencrypt \
-        /ad-hub.net/apps \
-        /ad-hub.net/media \
-        /ad-hub.net/media/acho_beta_file_queue \
-        /ad-hub.net/media/acho_beta_locks \
-        /ad-hub.net/media/acho_file_queue \
-        /ad-hub.net/media/acho_job/downloadChannelFriendCSVAsync \
-        /ad-hub.net/media/acho_locks \
-        /ad-hub.net/media/line_carousel_images \
-        /ad-hub.net/media/line_channel_pictures \
-        /ad-hub.net/media/line_chat_images \
-        /ad-hub.net/media/line_coupon_images \
-        /ad-hub.net/media/line_crop_images \
-        /ad-hub.net/media/line_imagemap \
-        /ad-hub.net/media/line_images \
-        /ad-hub.net/media/line_message_image \
-        /ad-hub.net/media/line_rich_menu_images \
-        /ad-hub.net/media/line_survey_images \
-        /ad-hub.net/media/line_tools \
-        /ad-hub.net/media/line_videos \
-        /ad-hub.net/media/messageRequestChunks/pool
-    chmod -R 777 /ad-hub.net/media/
-   
-    ### Setup memcached
-    sed -i -e 's/\(^-l .*\)/#\1/g' /etc/memcached.conf
-    sed -i -e 's/\(^-m .*\)/#\1\n-m 1024/g' /etc/memcached.conf
-    sed -i -e 's/\(^# -c .*\)/\1\n-c 8096/g' /etc/memcached.conf
-    systemctl restart memcached.service
-    systemctl enable memcached.service
-   
-    ### Setup NFS
-    echo "/ad-hub.net       /export/ad-hub.net   none    bind    0       0" >> /etc/fstab
-    mount -a
-    echo "/export             10.240.0.0/16(rw,fsid=0,no_subtree_check,sync)" >> /etc/exports
-    echo "/export/ad-hub.net  10.240.0.0/16(rw,nohide,insecure,no_root_squash,no_subtree_check,sync)" >> /etc/exports
-    systemctl restart nfs-*
-   
-    ### Setup Fluentd
-    curl -L https://toolbelt.treasuredata.com/sh/install-ubuntu-bionic-td-agent3.sh | sh
-    cp /etc/td-agent/td-agent.conf /etc/td-agent/td-agent.conf.bk
-    mkdir -p /var/log/fluent
-    chown -R td-agent.td-agent /var/log/fluent
-    apt-get install -y make build-essential libcurl4-gnutls-dev
-    td-agent-gem install fluent-plugin-azure-loganalytics
-   
-    cat << EOF > /etc/td-agent/td-agent.conf
-    <source>
-       @type forward
-       port 24224
-       bind 0.0.0.0
-       source_hostname_key fluent_client
-    </source>
-    
-    <source>
-       @type syslog
-       port 5140
-       bind 0.0.0.0
-       tag system
-    </source>
-    
-    <match acho.php-fpm.**>
-       @type copy
-       <store>
-          @type file
-          path /var/log/fluent/acho/php-fpm.%Y-%m-%d.%H%M
-          append true
-          compress gzip
-          <buffer time>
-             @type file
-             path /var/log/fluent/buffer/php-fpm
-             timekey 1d
-             timekey_wait 1m
-             flush_mode interval
-             flush_interval 3
-          </buffer>
-       </store>
-       <store>
-          @type azure-loganalytics
-          customer_id 1be3433b-480e-4826-9b1d-41a54e59ec9d
-          shared_key cj5xgWJkNBoP9c7EgH/JZkfczLJJwOFyMWY0avAvrYj6096xh+H4v4gNilHgfhxD78ZJhp7dFk4ory6U9zXUgg==
-          log_type AchoPhp
-          time_format %Y-%m-%d %H:%M:%S
-       </store>
-    </match>
-    <match acho.nginx.**>
-       @type copy
-       <store>
-          @type file
-          path /var/log/fluent/acho/nginx.%Y-%m-%d.%H%M
-          append true
-          compress gzip
-          <buffer time>
-             @type file
-             path /var/log/fluent/buffer/nginx
-             timekey 1d
-             timekey_wait 1m
-             flush_mode interval
-             flush_interval 3
-          </buffer>
-       </store>
-       <store>
-          @type azure-loganalytics
-          customer_id 1be3433b-480e-4826-9b1d-41a54e59ec9d
-          shared_key cj5xgWJkNBoP9c7EgH/JZkfczLJJwOFyMWY0avAvrYj6096xh+H4v4gNilHgfhxD78ZJhp7dFk4ory6U9zXUgg==
-          log_type AchoNginx
-          time_format %Y-%m-%d %H:%M:%S
-       </store>
-    </match>
-    <match acho.apps.**>
-       @type copy
-       <store>
-          @type file
-          path /var/log/fluent/acho/apps.%Y-%m-%d.%H%M
-          append true
-          compress gzip
-          <buffer time>
-             @type file
-             path /var/log/fluent/buffer/apps
-             timekey 1d
-             timekey_wait 1m
-             flush_mode interval
-             flush_interval 3
-          </buffer>
-       </store>
-       <store>
-          @type azure-loganalytics
-          customer_id 1be3433b-480e-4826-9b1d-41a54e59ec9d
-          shared_key cj5xgWJkNBoP9c7EgH/JZkfczLJJwOFyMWY0avAvrYj6096xh+H4v4gNilHgfhxD78ZJhp7dFk4ory6U9zXUgg==
-          log_type AchoApps
-          time_format %Y-%m-%d %H:%M:%S
-       </store>
-    </match>
-    <match acho.acho-java.**>
-       @type copy
-       <store>
-          @type file
-          path /var/log/fluent/acho/acho-java.%Y-%m-%d.%H%M
-          append true
-          compress gzip
-          <buffer time>
-             @type file
-             path /var/log/fluent/buffer/acho-java
-             timekey 1d
-             timekey_wait 1m
-             flush_mode interval
-             flush_interval 3
-          </buffer>
-       </store>
-       <store>
-          @type azure-loganalytics
-          customer_id 1be3433b-480e-4826-9b1d-41a54e59ec9d
-          shared_key cj5xgWJkNBoP9c7EgH/JZkfczLJJwOFyMWY0avAvrYj6096xh+H4v4gNilHgfhxD78ZJhp7dFk4ory6U9zXUgg==
-          log_type AchoJava
-          time_format %Y-%m-%d %H:%M:%S
-       </store>
-    </match>
-    
-    <match acho.**>
-       @type copy
-       <store>
-          @type file
-          path /var/log/fluent/acho/other.%Y-%m-%d.%H%M
-          append true
-          compress gzip
-          <buffer time>
-             @type file
-             path /var/log/fluent/buffer/acho
-             timekey 1d
-             timekey_wait 1m
-             flush_mode interval
-             flush_interval 3
-          </buffer>
-       </store>
-       <store>
-          @type azure-loganalytics
-          customer_id 1be3433b-480e-4826-9b1d-41a54e59ec9d
-          shared_key cj5xgWJkNBoP9c7EgH/JZkfczLJJwOFyMWY0avAvrYj6096xh+H4v4gNilHgfhxD78ZJhp7dFk4ory6U9zXUgg==
-          log_type AchoOthers
-          time_format %Y-%m-%d %H:%M:%S
-       </store>
-    </match>
-    
-    <match **>
-       @type copy
-       <store>
-          @type file
-          path /var/log/fluent/other.%Y-%m-%d.%H%M
-          append true
-          compress gzip
-          <buffer time>
-             @type file
-             path /var/log/fluent/buffer
-             timekey 1d
-             timekey_wait 1m
-             flush_mode interval
-             flush_interval 3
-          </buffer>
-       </store>
-       <store>
-          @type azure-loganalytics
-          customer_id 1be3433b-480e-4826-9b1d-41a54e59ec9d
-          shared_key cj5xgWJkNBoP9c7EgH/JZkfczLJJwOFyMWY0avAvrYj6096xh+H4v4gNilHgfhxD78ZJhp7dFk4ory6U9zXUgg==
-          log_type Others
-          time_format %Y-%m-%d %H:%M:%S
-       </store>
-    </match>
-    EOF
-
-    systemctl restart td-agent.service
-    systemctl enable td-agent.service 
-   
-    ########(Skipped) 設定 Azure File Share
-    sudo mkdir /mnt/ahstorageaccount
-    if [ ! -d "/etc/smbcredentials" ]; then
-    sudo mkdir /etc/smbcredentials
-    fi
-    if [ ! -f "/etc/smbcredentials/ahstorageaccount.cred" ]; then
-        sudo bash -c 'echo "username=ahstorageaccount" >> /etc/smbcredentials/ahstorageaccount.cred'
-        sudo bash -c 'echo "password=04YYW93U5jDlY3jwODY2KOPoIKdv9v//wd5BhfdTwrDBSNs5Z7bkb//pJ7qTtj1XWRpJXoCCquoy9d7hwGZy3A==" >> /etc/smbcredentials/ahstorageaccount.cred'
-    fi
-    sudo chmod 600 /etc/smbcredentials/ahstorageaccount.cred
-    
-    sudo bash -c 'echo "//ahstorageaccount.file.core.windows.net/acho-file-share /ad-hub.net-fs cifs nofail,vers=3.0,credentials=/etc/smbcredentials/ahstorageaccount.cred,dir_mode=0777,file_mode=0777,serverino,mfsymlinks" >> /etc/fstab'
-    sudo mount -t cifs //ahstorageaccount.file.core.windows.net/acho-file-share /ad-hub.net-fs -o vers=3.0,credentials=/etc/smbcredentials/ahstorageaccount.cred,dir_mode=0777,file_mode=0777,serverino,mfsymlinks
-
+    # 安裝 External Services
+    ./ad-hub.net/scripts/setup_external_server.sh
+    az login
+    reboot
+      
+    # 記得複製 /root/.ssh/id_rsa.pub 到 gogs 上的 Deploy Keys
     ```
 
 5. 架設 Kubernetes 環境
@@ -350,14 +89,14 @@
     az login
    
     # 登入 Container Registry
-    docker login -u adhubtest -p 'sCoQUFRhbd4VxTHsnQsE6FUXnBoV2+QH' adhubtest.azurecr.io
-    az acr login --name adhubtest --subscription "IUR 12000 Sponsorship ends 20180415"
+    docker login -u adhub -p 'voYi8whxWjm8izOTEABPWw=R49j=JAGY' adhub.azurecr.io
+    az acr login --name adhub
    
     # 取得 Kubernetes 叢集認證
-    az aks get-credentials --resource-group adHub-KubernetesTest --name ahK8sCluster
+    az aks get-credentials --resource-group adHub_KubernetesTest --name ah-t-k8s
    
     # 將 K8S 與 Container Registry 建立連結 (需要跑一陣子)
-    az aks update -n ahK8sCluster -g adHub-KubernetesTest --attach-acr adhubtest
+    az aks update -n ah-t-k8s -g adHub_KubernetesTest --attach-acr adhub
    
     ########(使用 Azure File Share 才需要) 建立 Kubernetes Secret 並儲存在某個 Storage Account
     kubectl create secret generic azure-secret --from-literal azurestorageaccountname=ahstorageaccount --from-literal azurestorageaccountkey="04YYW93U5jDlY3jwODY2KOPoIKdv9v//wd5BhfdTwrDBSNs5Z7bkb//pJ7qTtj1XWRpJXoCCquoy9d7hwGZy3A==" --type=Opaque

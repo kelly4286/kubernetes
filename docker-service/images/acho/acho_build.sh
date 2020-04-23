@@ -46,8 +46,8 @@ fi
 EM=!
 echo -e "branchs/*\n${EM}branchs/${BRANCH_NAME}" > .dockerignore
 
-docker build . --build-arg OPENJDK=$OPENJDK --build-arg BRANCH_NAME=$BRANCH_NAME -t $REGISTRY/acho:$IMAGE_TAG
+docker build . --build-arg OPENJDK=$OPENJDK --build-arg BRANCH_NAME=$BRANCH_NAME -t $REGISTRY/k8s-acho:$IMAGE_TAG
 
-# docker run -p 127.0.0.1:80:80 -it kelly4286/acho:9.1.2.3
+# docker run -p 127.0.0.1:80:80 -it adhub.azurecr.io/k8s-acho:9.1.2.3
 
-# docker push ahacr.azurecr.io/acho:9.1.1.18
+# docker push adhub.azurecr.io/k8s-acho:9.1.1.18

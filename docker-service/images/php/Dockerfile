@@ -1,5 +1,5 @@
-# docker build . -t adhub.azurecr.io/php:5.6-stretch-fpm-custom
-# docker push adhub.azurecr.io/php:5.6-stretch-fpm-custom
+# docker build . -t adhub.azurecr.io/k8s-php:5.6-stretch-fpm-custom
+# docker push adhub.azurecr.io/k8s-php:5.6-stretch-fpm-custom
 FROM php:5.6-fpm-stretch
 
 ENV RUNTIME_DEPS git less wget nginx cron rsyslog supervisor logrotate libgeoip1 imagemagick libmagickwand-6.q16-3 ffmpeg mailutils gettext locales

@@ -2,7 +2,7 @@ version: "3"
 
 services:
     php:
-        image: adhub.azurecr.io/acho:Empty
+        image: adhub.azurecr.io/k8s-acho:Empty
         working_dir: /ad-hub.net/apps
         restart: always
         stop_grace_period: 60s
