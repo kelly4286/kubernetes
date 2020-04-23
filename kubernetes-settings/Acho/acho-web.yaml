@@ -40,69 +40,54 @@ spec:
         persistentVolumeClaim:
           claimName: nfs-pvc
       hostAliases:
-      - ip: "10.240.0.66"  #change to external server's private ip
+      - ip: "10.19.16.4"  #change to external server's private ip
         hostnames:
-        - "external-server"
+        - "vmss-external-server"
       - ip: "127.0.0.1"
         hostnames:
         - "acho-localhost"
       containers:
       - name: acho-web
-        image: adhubtest.azurecr.io/acho:0.1
+        image: adhub.azurecr.io/k8s-acho:Empty
         imagePullPolicy: IfNotPresent
         env:
         - name: LANG
           value: "C.UTF-8"
         - name: ENABLE_CROND
           value: "no"
+        - name: VMSS_ENV
+          value: "dev"
         resources:
           limits:
-            cpu: 512m
-            memory: 4Gi
+            cpu: 256m
+            memory: 1Gi
         ports:
         - containerPort: 80
         volumeMounts:
         - name: nfs
-          mountPath: /ad-hub.net
-        - name: nfs
-          mountPath: /usr/local/etc/freetds.conf
-          subPath: docker-service/config/freetds/freetds.conf
-        - name: nfs
-          mountPath: /usr/local/etc/locales.conf
-          subPath: docker-service/config/freetds/locales.conf
-        - name: nfs
-          mountPath: /etc/nginx/dhparam.pem
-          subPath: docker-service/config/nginx/dhparam.pem
-        - name: nfs
-          mountPath: /etc/nginx/nginx.conf
-          subPath: docker-service/config/nginx/nginx.conf
-        - name: nfs
-          mountPath: /etc/nginx/nginxconfig.io
-          subPath: docker-service/config/nginx/nginxconfig.io
-        - name: nfs
-          mountPath: /etc/nginx/sites-available
-          subPath: docker-service/config/nginx/sites-available
-        - name: nfs
-          mountPath: /etc/nginx/sites-enabled
-          subPath: docker-service/config/nginx/sites-enabled
-        - name: nfs
-          mountPath: /usr/local/etc/php/conf.d/adhub.ini
-          subPath: docker-service/config/php-fpm/php.ini
-        - name: nfs
-          mountPath: /usr/local/etc/php-fpm.d/zz-adhub.conf
-          subPath: docker-service/config/php-fpm/zz-adhub.conf
-        - name: nfs
-          mountPath: /etc/supervisor/conf.d
-          subPath: docker-service/config/supervisor.d
-        - name: nfs
-          mountPath: /etc/acho-java
-          subPath: docker-service/config/acho-java
-        - name: nfs
-          mountPath: /etc/td-agent/td-agent.conf
-          subPath: docker-service/config/td-agent/td-agent.conf
-        - name: nfs
-          mountPath: /etc/acho-crontab
-          subPath: docker-service/scripts/acho-crontab
-        - name: nfs
           mountPath: /docker-entrypoint-init.sh
           subPath: docker-service/scripts/docker-entrypoint-init.sh
+#        - name: nfs
+#          mountPath: /etc/letsencrypt
+#          subPath: /etc/letsencrypt
+        - name: nfs
+          mountPath: /ad-hub.net/apps
+          subPath: apps
+        - name: nfs
+          mountPath: /ad-hub.net/media
+          subPath: media
+        - name: nfs
+          mountPath: /etc/acho-scripts
+          subPath: docker-service/scripts
+        - name: nfs
+          mountPath: /etc/service-configs
+          subPath: docker-service/config
+        - name: nfs
+          mountPath: /etc/acho-java
+          subPath: docker-service/config/acho-java/${VMSS_ENV:-dev}
+        - name: nfs
+          mountPath: /etc/nginx/sites-enabled
+          subPath: docker-service/config/nginx/sites-available/${VMSS_ENV:-dev}
+        - name: nfs
+          mountPath: /etc/supervisor/conf.d
+          subPath: docker-service/config/supervisor.d/${VMSS_ENV:-dev}
