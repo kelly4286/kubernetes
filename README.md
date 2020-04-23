@@ -76,7 +76,26 @@
     # 記得複製 /root/.ssh/id_rsa.pub 到 gogs 上的 Deploy Keys
     ```
 
-5. 架設 Kubernetes 環境
+5. 建立 Kubernetes Service
+   - Kubernetes cluster name: adHubK8sTest
+   - 位置: (亞太地區) 日本東部
+   - Node size:  待定
+   - Node count:  待定
+   - Scale / Virtual nodes: Disabled
+   - Scale / VM scale sets: Enabled
+   - Enable RBAC: 是
+   - 網路 / Network configuration: Advanced
+   - 網路 / Virtual network: adHub_Azure_10.19
+   - 網路 / Cluster subnet: adhub-k8s-jp-subnet (10.19.16.0/20)
+   - 網路 / Kubernetes service address range: 10.0.0.0/16
+   - 網路 / Kubernetes DNS service IP address: 10.0.0.10
+   - 網路 / Docker Bridge address: 172.17.0.1/16
+   - 網路 / DNS name prefix: adHubK8sTest-dns
+   - 網路 / Private cluster: Disabled
+   - 網路 / Network policy: Azure
+   - 網路 / HTTP application routing: 否
+
+6. 在外部虛擬機器架設 Kubernetes 環境
 
     ```sh
     # 安裝 kubectl
