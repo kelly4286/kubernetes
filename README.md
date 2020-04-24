@@ -108,7 +108,7 @@
     az login
    
     # 登入 Container Registry
-    docker login -u adhub -p 'voYi8whxWjm8izOTEABPWw=R49j=JAGY' adhub.azurecr.io
+    docker login -u adhub -p 'XXXX' adhub.azurecr.io
     az acr login --name adhub
    
     # 取得 Kubernetes 叢集認證
