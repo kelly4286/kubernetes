@@ -56,7 +56,7 @@ spec:
         - name: ENABLE_CROND
           value: "no"
         - name: VMSS_ENV
-          value: "dev"
+          value: "vmss-test"
         resources:
           limits:
             cpu: 256m
@@ -84,10 +84,10 @@ spec:
           subPath: ad-hub.net/docker-service/config
         - name: nfs
           mountPath: /etc/acho-java
-          subPath: ad-hub.net/docker-service/config/acho-java/$(VMSS_ENV)
+          subPath: ad-hub.net/docker-service/config/acho-java/vmss-test
         - name: nfs
           mountPath: /etc/nginx/sites-enabled
-          subPath: ad-hub.net/docker-service/config/nginx/sites-available/$(VMSS_ENV)
+          subPath: ad-hub.net/docker-service/config/nginx/sites-available/vmss-test
         - name: nfs
           mountPath: /etc/supervisor/conf.d
-          subPath: ad-hub.net/docker-service/config/supervisor.d/$(VMSS_ENV)
+          subPath: ad-hub.net/docker-service/config/supervisor.d/vmss-test

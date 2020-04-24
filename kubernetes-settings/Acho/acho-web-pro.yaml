@@ -1,0 +1,93 @@
+#kind: Service
+#apiVersion: v1
+#metadata:
+#  name: acho-web-service
+#spec:
+#  type: LoadBalancer
+#  selector:
+#    app: acho
+#    type: web
+#  ports:
+#    - name: www
+#      port: 80
+#      targetPort: 80
+
+---
+
+kind: Deployment
+apiVersion: apps/v1
+metadata:
+  name: acho-web-deployment
+  labels:
+    app: acho
+    type: web
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: acho
+      type: web
+  template:
+    metadata:
+      annotations:
+        ad-hub.net/changeForRollingUpdate: U1
+      labels:
+        app: acho
+        type: web
+    spec:
+      volumes:
+      - name: nfs
+        persistentVolumeClaim:
+          claimName: nfs-pvc
+      hostAliases:
+      - ip: "10.19.16.4"  #change to external server's private ip
+        hostnames:
+        - "vmss-external-server"
+      - ip: "127.0.0.1"
+        hostnames:
+        - "acho-localhost"
+      containers:
+      - name: acho-web
+        image: adhub.azurecr.io/k8s-acho:Empty
+        imagePullPolicy: IfNotPresent
+        env:
+        - name: LANG
+          value: "C.UTF-8"
+        - name: ENABLE_CROND
+          value: "no"
+        - name: VMSS_ENV
+          value: "vmss-pro"
+        resources:
+          limits:
+            cpu: 256m
+            memory: 1Gi
+        ports:
+        - containerPort: 80
+        volumeMounts:
+        - name: nfs
+          mountPath: /docker-entrypoint-init.sh
+          subPath: ad-hub.net/docker-service/scripts/docker-entrypoint-init.sh
+        - name: nfs
+          mountPath: /etc/letsencrypt
+          subPath: letsencrypt
+        - name: nfs
+          mountPath: /ad-hub.net/apps
+          subPath: ad-hub.net/apps
+        - name: nfs
+          mountPath: /ad-hub.net/media
+          subPath: ad-hub.net/media
+        - name: nfs
+          mountPath: /etc/acho-scripts
+          subPath: ad-hub.net/docker-service/scripts
+        - name: nfs
+          mountPath: /etc/service-configs
+          subPath: ad-hub.net/docker-service/config
+        - name: nfs
+          mountPath: /etc/acho-java
+          subPath: ad-hub.net/docker-service/config/acho-java/vmss-pro
+        - name: nfs
+          mountPath: /etc/nginx/sites-enabled
+          subPath: ad-hub.net/docker-service/config/nginx/sites-available/vmss-pro
+        - name: nfs
+          mountPath: /etc/supervisor/conf.d
+          subPath: ad-hub.net/docker-service/config/supervisor.d/vmss-pro
