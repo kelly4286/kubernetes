@@ -1,8 +1,5 @@
 #!/bin/sh
 
-# Wait 300 seconds
-sleep 300
-
 # Install Docker, Docker Compose and dependent packages
 apt-get update
 apt-get -y upgrade

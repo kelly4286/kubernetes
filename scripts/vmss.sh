@@ -156,6 +156,7 @@ function update_initial_script(){
             --publisher Microsoft.Azure.Extensions \
             --resource-group $resource_group \
             --vmss-name $vmss_name \
+            --provision-after-extensions DependencyAgentLinux \
             --settings '{"script": "'${script}'"}'
     else
         echo Canceled!
