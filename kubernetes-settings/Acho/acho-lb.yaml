@@ -2,8 +2,6 @@ kind: Service
 apiVersion: v1
 metadata:
   name: acho-web-service
-  annotations:
-    service.beta.kubernetes.io/azure-load-balancer-internal: "true"
 spec:
   type: LoadBalancer
   loadBalancerIP: 20.44.140.48  #change to a valid public IP

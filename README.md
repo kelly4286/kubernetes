@@ -94,8 +94,48 @@
    - 網路 / Private cluster: Disabled
    - 網路 / Network policy: Azure
    - 網路 / HTTP application routing: 否
+   
+6. 把 ACHO 的程式放到 `/ad-hub.net/apps`
+    
+    ```sh
+    cd /ad-hub.net/apps
 
-6. 在外部虛擬機器架設 Kubernetes 環境
+    scp <Somewhere>/acho.jar /ad-hub.net/apps/release/LN_PRO-X.X.X.jar
+    scp <Somewhere>/acho.jar /ad-hub.net/apps/release/LN_BETA-X.X.X.jar
+   
+    chown root:root /ad-hub.net/apps/release/LN_PRO-X.X.X.jar
+    chown root:root /ad-hub.net/apps/release/LN_BETA-X.X.X.jar
+    
+    ln -s /ad-hub.net/apps/release/LN_PRO-X.X.X.jar /ad-hub.net/apps/line_pro.jar
+    ln -s /ad-hub.net/apps/release/LN_BETA-X.X.X.jar /ad-hub.net/apps/line_beta.jar
+
+    # 使用 acho-release 部署 PRO 和 BETA 程式
+    # 執行過程中需要輸入環境和 branch，確認 deploy 過程中沒有出現 `ERROR` 訊息
+    vmss acho-release
+    ```
+
+7. 如果是 VMSS 測試環境先將 Nginx 中的 ssl 連線關閉
+
+    ```sh
+    vim /ad-hub.net/docker-service/config/nginx/sites-available/vmss-test/ah-t-k8s.japaneast.cloudapp.azure.com.conf
+    ```
+
+    ```
+    server {
+        listen 443 ssl http2;        ## 將 ssl 移除
+        listen [::]:443 ssl http2;   ## 將 ssl 移除
+    
+        server_name acho-localhost ah-t-k8s.japaneast.cloudapp.azure.com;
+        include adhub/acho-base.conf;
+    
+        # SSL
+        ssl_certificate /etc/letsencrypt/live/ah-t-k8s.japaneast.cloudapp.azure.com/fullchain.pem;     ## 將這行註解
+        ssl_certificate_key /etc/letsencrypt/live/ah-t-k8s.japaneast.cloudapp.azure.com/privkey.pem;   ## 將這行註解
+        ssl_trusted_certificate /etc/letsencrypt/live/ah-t-k8s.japaneast.cloudapp.azure.com/chain.pem; ## 將這行註解
+
+    ```
+
+8. 在外部虛擬機器架設 Kubernetes 環境
 
     ```sh
     # 安裝 kubectl
@@ -128,8 +168,19 @@
     
     ## Deploy App
     kubectl apply -f acho-web.yaml
-
-    
+    kubectl apply -f acho-lb.yaml    
     ```
-   
+
+9. 應該可以透過 `http://ah-t-k8s.japaneast.cloudapp.azure.com` 看到 Nginx 的頁面
+
+10. 最後，如果是測試環境可以 certbot 建立憑證，再把設定檔啟動。如果是正式環境則要把 adHub 憑證放到主機設，並建立對應的設定。
+
+    ```sh
+    # Optional - 產生憑證
+    certbot certonly --webroot -w /ad-hub.net/apps/ -d ah-t-k8s.japaneast.cloudapp.azure.com --email kelly.lan@ad-hub.net -n --agree-tos --force-renewal
+    
+    # 將第 7 步驟的 ssl 加回去並移除註解，重新載入 nginx 設定
+    vim /ad-hub.net/docker-service/config/nginx/sites-available/vmss-test/ah-t-k8s.japaneast.cloudapp.azure.com.conf
+    nginx -s reload
+    ```   
    

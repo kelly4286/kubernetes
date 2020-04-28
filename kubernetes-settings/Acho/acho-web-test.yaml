@@ -43,7 +43,7 @@ spec:
           value: "vmss-test"
         resources:
           limits:
-            cpu: 256m
+            cpu: 512m
             memory: 1Gi
         ports:
         - containerPort: 80
